@@ -5,6 +5,7 @@
 #		-in <String> Input list of StringTie gtf
 #		-out <String> Output base
 #		-exp <String>  The atribute for the getting expression value (cov, FPKM, TPM and etc.)
+#		-prefix <String> The prefix of gene and transcript IDs (Default: NIAP)
 #		-btp <String> The path to bedtools
 #Change log:
 #	v1.1	2021-03	It was descended from merge_StringTie_gtf_v1.2.pl. It now does not only support StringTie output like files, but also .gtf without transcripts rows.
@@ -16,6 +17,7 @@ use List::Util qw(max min);
 my $in;
 my $out;
 my $exp;
+my $prefix = "NIAP";
 my $btp;
 my $help = 0;
 
@@ -23,6 +25,7 @@ GetOptions(
 	'in=s'	=>	\$in,
 	'out=s'	=>	\$out,
 	'exp=s'	=>	\$exp,
+	'prefix=s'	=>	\$prefix,
 	'btp=s'	=>	\$btp,
         'h!'    =>      \$help,
 );
@@ -53,10 +56,15 @@ my $out_id = $out . "_id.txt";
 my %loci = ();
 my @sample = ();
 parse_list($in, \%loci);
-print_gtf_exp(\%loci, $in, $out, $exp, $btp, $out_gtf, $out_exp, $out_id);
+print_gtf_exp(\%loci, $in, $out, $exp, $btp, $out_gtf, $out_exp, $out_id, $prefix);
 
 sub print_usage{
-	print "Usage: perl NIAP_merge_v1.1.pl [option]\n\t-in <String> Input list of StringTie gtf\n\t-out <String> Output base\n\t-exp <String>  The atribute for the getting expression value (cov, FPKM, TPM or etc.)\n\t-btp <String> The path to bedtools\n";
+	print "Usage: perl NIAP_merge_v1.1.pl [option]
+	\t-in <String> Input list of StringTie gtf
+	\t-out <String> Output base
+	\t-exp <String>  The atribute for the getting expression value (cov, FPKM, TPM or etc.)
+	\t-prefix <String> The prefix of gene and transcript IDs (Default: NIAP)
+	\t-btp <String> The path to bedtools\n";
 }
 
 #Count the number of samples
@@ -355,6 +363,7 @@ sub print_gtf_exp{
 	my $temp_out_gtf = $_[5];
 	my $temp_out_exp = $_[6];
 	my $temp_out_id = $_[7];
+	my $temp_prefix = $_[8];
 	my $random = `tr -dc A-Za-z0-9 </dev/urandom | head -c 10`;
 	my %temp_strand_flag = ('+', 0, '-', 1);
 	open(GTF, ">temp_$random.gtf") or die "Cannot create temp_$random.gtf!\n";
@@ -373,7 +382,7 @@ sub print_gtf_exp{
 			my $temp_loci_count = 1;
 			foreach my $temp_loci (@{$loci_ref->{$temp_chr}{$temp_strand}}){
 				#print "$temp_chr\t$temp_strand\t$temp_loci\n";
-				print GTF "\n$temp_chr\tNIAP\tgene\t$temp_loci->[0]\t$temp_loci->[1]\t.\t$temp_strand\t.\tgene_id \"${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}\"\;";
+				print GTF "\n$temp_chr\tNIAP\tgene\t$temp_loci->[0]\t$temp_loci->[1]\t.\t$temp_strand\t.\tgene_id \"${temp_prefix}_${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}\"\;";
 				my @temp_loci = @{$temp_loci};
 				my %temp_eej = %{$temp_loci[2]};
 				my $temp_transcript_count = 1;
@@ -383,7 +392,7 @@ sub print_gtf_exp{
 						my $temp_eej_new = $temp_transcript[0]. $temp_eej . $temp_transcript[1];
 						my @temp_eej = split(',', $temp_eej_new);
 						my $temp_num_exon = @temp_eej;
-						print GTF "\n$temp_chr\tNIAP\ttranscript\t$temp_transcript[0]\t$temp_transcript[1]\t.\t$temp_strand\t.\tgene_id \"${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}\"\; transcript_id \"${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}.${temp_transcript_count}\"\;";
+						print GTF "\n$temp_chr\tNIAP\ttranscript\t$temp_transcript[0]\t$temp_transcript[1]\t.\t$temp_strand\t.\tgene_id \"${temp_prefix}_${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}\"\; transcript_id \"${temp_prefix}_${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}.${temp_transcript_count}\"\;";
 						for(my $i = 0; $i < $temp_num_exon; $i++){
 							my $temp_cur_exon_num;
 							my @temp_exon = split('-', $temp_eej[$i]);
@@ -395,17 +404,24 @@ sub print_gtf_exp{
 							else{
 								$temp_cur_exon_num = $i + 1;
 							}
-							print GTF "\n$temp_chr\tStringTie\texon\t$temp_exon[0]\t$temp_exon[1]\t.\t$temp_strand\t.\tgene_id \"${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}\"\; transcript_id \"${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}.${temp_transcript_count}\"\; exon_number \"$temp_cur_exon_num\"\;";
+							print GTF "\n$temp_chr\tNIAP\texon\t$temp_exon[0]\t$temp_exon[1]\t.\t$temp_strand\t.\tgene_id \"${temp_prefix}_${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}\"\; transcript_id \"${temp_prefix}_${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}.${temp_transcript_count}\"\; exon_number \"$temp_cur_exon_num\"\;";
 						}
 						if($temp_exp){
-							print EXP "\n${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}.${temp_transcript_count}";
+							print EXP "\n${temp_prefix}_${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}.${temp_transcript_count}";
 							foreach my $temp_exp (@{$temp_transcript[2]}){
 								print EXP "\t$temp_exp";
 							}
 						}
-						print ID "\n${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}\t${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}.${temp_transcript_count}\t";
+						print ID "\n${temp_prefix}_${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}\t${temp_prefix}_${temp_chr}_$temp_strand_flag{$temp_strand}_${temp_loci_count}.${temp_transcript_count}\t";
+						my $temp_coma_flag = 0;
 						foreach my $temp_ref_id (keys %{$temp_transcript[3]}){
-							print ID "$temp_ref_id,";
+							if($temp_coma_flag == 0){
+								$temp_coma_flag = 1;
+							}
+							else{
+								print ID ",";
+							}
+							print ID "$temp_ref_id";
 						}
 						$temp_transcript_count++;
 					}

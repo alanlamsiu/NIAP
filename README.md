@@ -74,6 +74,8 @@ The query file should be in .gtf format, while the reference file should be in .
 
 ## 4. Transcript consolidation for long-read RNA-seq data
 
-The transcript consolidation step is mainly used for analyzing long-read RNA-seq data, including Nanopore and Pac-Bio data.
+The transcript consolidation step is mainly used for analyzing long-read RNA-seq data, including Nanopore and Pac-Bio data. The overall workflow is shown in the schematic illustration below, which can be divided into Pac-Bio Iso-Seq and Nanopore direct RNA-seq sessions.
 
+![NIAP_consolidate](https://user-images.githubusercontent.com/34832128/113114239-b73fbc80-923d-11eb-9c1b-6e902bbb7f50.jpg)
 
+Pac-Bio Iso-Seq data are in general quite accurate. Therefore, after mapping the transcripts to the reference genome by the tool of choice (e.g. minimap2, https://github.com/lh3/minimap2), the mapped transcripts can be collapsed directly, based on their structures, to generate the representative transcripts in .gtf format. The same protocol can be used for Nanopore direct RNA-seq data. However, it is not recommended because Nanopore direct RNA-seq data are usually quite erroneous. It is encouraged to include the more accurate short-read RNA-seq data to correct those potentially erroneous exon-exon junctions in the Nanopore direct RNA-seq data. Before correction, the short-read RNA-seq data need to be mapped to the reference genome. Then the exon-exon junctions can be detected by NIAP, based on the read mapping result. In the error correction step, each exon-exon junction of the Nanopore direct RNA-seq transcripts will be compared with the more accurate exon-exon junctions detected from short-read RNA-seq. If the deviation between Nanopore direct RNA-seq and short-read RNA-seq exon-exon junctions does not exceed a user-specified threshold, the Nanopore direct RNA-seq junction will be  Users should be cautious that this error correction step is not perfect, because the 

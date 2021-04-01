@@ -33,7 +33,13 @@ perl NIAP_merge_v1.1.pl [option]
   -h <Boolean> Help
 ```
 
-The input is a plain text file specifying the .gtf file(s) to be merged, one for each row. The full path(s) to the file(s) is(are) needed. There can be a single file or multiple files. A .gtf file of the representative transcirpts after merging and a plain text file, with a sufix of `"_id.txt"`, indicating the source of each representative transcripts will be generated. The `"_id.txt"` file is consisted of three columns, where the first two columns indicating the gene ID and transcript ID of the representative transcripts, the third one indicating `","` delineated original IDs before merging. If the `-exp` option is specified for extracting the expression levele, or any other quantitative properties, of the transcripts, a summary table with the suffix `_exp.txt` will be generated. The IDs of a gene and a transcript after merging as `"<PREFIX>_<CHR>_[01]_<LOCI_NUM>"` and `"<PREFIX>_<CHR>_[01]_<LOCUS_NUM>.<TRANSCRIPT_NUM>"`, respectively. The `"<PREFIX>"` value is `"NIAP"` by default or specified by users and can be specified by the `-prefix` option. The `"<CHR>"` value indicates the chromosome name. The `"[01]"` value indicates the strand of the locus, or transcript, with `"0"` meaning the `"+"` strand and `"1"` meaning the `"-"` one. The `"<LOCI_NUM>"` indicates the positional order of a locus at a strand. A locus is defined as a region consisted of overlapping transcripts, with each overlapping region containing at least two transcripts. The `"<TRANSCRIPT_NUM>"` is a unique identifier of a transcript in the corresponding locus. The `-btp` is not necessary if bedtools is already in $PATH.
+The input is a plain text file specifying the .gtf file(s) to be merged, one for each row. The full path(s) to the file(s) is(are) needed. There can be a single file or multiple files.
+
+A .gtf file of the representative transcirpts after merging and a plain text file, with a sufix of `"_id.txt"`, indicating the source of each representative transcripts, will be generated. The `"_id.txt"` file is consisted of three columns, where the first two columns indicating the gene ID and transcript ID of the representative transcripts, the third one indicating `","` delineated original IDs before merging.
+
+If the `-exp` option is specified for extracting the expression levele, or any other quantitative properties, of the transcripts, a summary table with the suffix `_exp.txt` will be generated.
+
+The IDs of a gene and a transcript after merging as `"<PREFIX>_<CHR>_[01]_<LOCI_NUM>"` and `"<PREFIX>_<CHR>_[01]_<LOCUS_NUM>.<TRANSCRIPT_NUM>"`, respectively. The `"<PREFIX>"` value is `"NIAP"` by default or specified by users and can be specified by the `-prefix` option. The `"<CHR>"` value indicates the chromosome name. The `"[01]"` value indicates the strand of the locus, or transcript, with `"0"` meaning the `"+"` strand and `"1"` meaning the `"-"` one. The `"<LOCI_NUM>"` indicates the positional order of a locus at a strand. A locus is defined as a region consisted of overlapping transcripts, with each overlapping region containing at least two transcripts. The `"<TRANSCRIPT_NUM>"` is a unique identifier of a transcript in the corresponding locus. The `-btp` is not necessary if bedtools is already in $PATH.
   
 ## 2. Transcript annotation
 
@@ -54,7 +60,15 @@ perl NIAP_annotate_v1.3.pl [option]
   -h <Boolean> Help
 ```
 
-Both query and reference inputs should be in proper .gtf format. The output is a .gtf file with the `"asm_id"` and `"status"` attributes. The `"asm_id"` can be only found in annotated transcripts indicating the transcript ID before the annotation step. The value of `"status"` can be referred to the classification shown above. If the query transcripts are strand-specific, meaning there is no transcript with the strand column shown as a `"."`, the `-s` option should be specified, which will make a difference in handling monoexonic transcripts while leaving those multiexonic unaffected. If users wish to include transcripts only present in the reference, whose `"status"` attribute will be shown as `"missing"`, the `-m` option can be specified. The `-btp` is not necessary if bedtools is already in $PATH.
+Both query and reference inputs should be in proper .gtf format.
+
+The output is a .gtf file with the `"asm_id"` and `"status"` attributes. The `"asm_id"` can be only found in annotated transcripts indicating the transcript ID before the annotation step. The value of `"status"` can be referred to the classification shown above.
+
+If the query transcripts are strand-specific, meaning there is no transcript with the strand column shown as a `"."`, the `-s` option should be specified, which will make a difference in handling monoexonic transcripts while leaving those multiexonic unaffected.
+
+If users wish to include transcripts only present in the reference, whose `"status"` attribute will be shown as `"missing"`, the `-m` option can be specified.
+
+The `-btp` is not necessary if bedtools is already in $PATH.
 
 ## 3. Transcript comparison
 
@@ -120,6 +134,16 @@ perl NIAP_v1.1.pl [option]
   -h <Boolean> Help  
 ```
 
-It is recommended to use minimap2 to generate the .bam file input. A .gtf file indicating the accurate exon-exon junctions for error correction can be specified, especially for dRNA-seq data. NIAP comes with a script, `NIAP_split_read2intron_v1.1.pl`, to generate a such file, which indicating the borders of introns. The shematic illustration below describe when the `-injunc` option is needed, when speciying the `-junc` option for error correction.
+It is recommended to use minimap2 to generate the .bam file input. A .gtf file indicating the accurate exon-exon junctions for error correction can be specified, especially for dRNA-seq data. NIAP comes with a script, `NIAP_split_read2intron_v1.1.pl`, to generate a such file, which indicating the borders of introns. The shematic illustration below describe when the `-injunc` option is needed, when speciying the `-junc` option for error correction. If the exon-exon junctions .gtf file is genreated by `NIAP_split_read2intron_v1.1.pl`, the `-injunc` option is required.
 
 ![NIAP_injunc](https://user-images.githubusercontent.com/34832128/113243661-ff1a1e80-92e5-11eb-9854-3bcbcdc9ecdf.jpg)
+
+In the error correction step, an exon-exon junction from the dRNA-seq data will be corrected if the deviation does not exceed the threadshold, as specified by the `-minjuncdist` option. Otherwise, a transcript will be filtered if it fails for any of it exon-exon junctions. With the `-enddist` option enabled, a table with the suffix `"_end_dist.txt"` will be generated to summarize the distributions of 5' and 3' end positions, in column five and six, respectively. The distribution of end positions is recored as follows.
+
+`<position 1>:<read count 1>,<position 2>:<read count 2>,...`
+
+Each position refers to the position in the corresponding strand of a chromosome.
+
+The `-polya` option takes in a table generated by the `polya` function of nanopolish.
+
+

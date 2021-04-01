@@ -74,12 +74,20 @@ The query file should be in .gtf format, while the reference file should be in .
 
 ## 4. Transcript consolidation for long-read RNA-seq data
 
-The transcript consolidation step is mainly used for analyzing long-read RNA-seq data, including Nanopore direct RNA-seq (dRNA-seq) and Pac-Bio Iso-Seq (Iso-Seq) data. The overall workflow is shown in the schematic illustration below, which can be divided into Iso-Seq and dRNA-seq sessions.
+The transcript consolidation step is mainly used for analyzing long-read RNA-seq data, including Nanopore direct RNA-seq (dRNA-seq) and Pac-Bio Iso-Seq (Iso-Seq) data. The `NIAP_v1.1.pl` script is used for this purpose. The overall workflow is shown in the schematic illustration below, which can be divided into Iso-Seq and dRNA-seq sessions.
 
 ![NIAP_consolidate](https://user-images.githubusercontent.com/34832128/113114239-b73fbc80-923d-11eb-9c1b-6e902bbb7f50.jpg)
 
-Iso-Seq data are in general quite accurate. Therefore, after mapping the transcripts to the reference genome by the tool of choice (e.g. minimap2, https://github.com/lh3/minimap2), the mapped transcripts can be collapsed directly, based on their structures, to generate the representative transcripts in .gtf format. The same protocol can be used for dRNA-seq data. However, it is not recommended because dRNA-seq data are usually quite erroneous. It is encouraged to include the more accurate short-read RNA-seq data to correct those potentially erroneous exon-exon junctions in dRNA-seq data. Before correction, the short-read RNA-seq data need to be mapped to the reference genome. Then the exon-exon junctions can be detected by NIAP, based on the read mapping result. In the error correction step, each exon-exon junction of the dRNA-seq transcripts will be compared with the more accurate exon-exon junctions detected from short-read RNA-seq. If the deviation between dRNA-seq and short-read RNA-seq exon-exon junctions does not exceed a user-specified threshold, the dRNA-seq junction will be placed by the short-read RNA-seq one. The deviation is defined as below.
+### Iso-Seq
+
+Iso-Seq data are in general quite accurate. Therefore, after mapping the transcripts to the reference genome by the tool of choice (e.g. minimap2, https://github.com/lh3/minimap2), the mapped transcripts can be collapsed directly, based on their structures, to generate the representative transcripts in .gtf format.
+
+### dRNA-seq
+
+The same protocol can be used for dRNA-seq data. However, it is not recommended because dRNA-seq data are usually quite erroneous. It is encouraged to include the more accurate short-read RNA-seq data to correct those potentially erroneous exon-exon junctions in dRNA-seq data. Before correction, the short-read RNA-seq data need to be mapped to the reference genome. Then the exon-exon junctions can be detected by NIAP, based on the read mapping result. In the error correction step, each exon-exon junction of the dRNA-seq transcripts will be compared with the more accurate exon-exon junctions detected from short-read RNA-seq. If the deviation between dRNA-seq and short-read RNA-seq exon-exon junctions does not exceed a user-specified threshold, the dRNA-seq junction will be placed by the short-read RNA-seq one. The deviation is defined as below.
 
 `deviation = |left position of dRNA-seq junction - left position of short-read RNA-seq junciton| + |right position of dRNA-seq junction - right position of short-read RNA-seq junciton|`
 
-Users should be cautious that this error correction step is not perfect, because the 
+Users should be cautious that this error correction step is not perfect, because an exon-exon junction from the short-read RNA-seq data is not guaranteed to correspond to the transcript from dRNA-seq, which uses it for correction. Such correspondence relationship is computationally intractable. As a result, it may lead to over-correction and generate false transcripts.
+
+Apart from consoidating dRNA-seq data 

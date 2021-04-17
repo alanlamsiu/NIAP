@@ -98,7 +98,7 @@ The `-btp` is not necessary if bedtools is already in $PATH.
 
 ## 4. Transcript consolidation for long-read RNA-seq data
 
-The transcript consolidation step is mainly used for analyzing long-read RNA-seq data, including Nanopore direct RNA-seq (dRNA-seq) and Pac-Bio Iso-Seq (Iso-Seq) data. The `NIAP_v1.1.pl` script is used for this purpose. The overall workflow is shown in the schematic illustration below, which can be divided into Iso-Seq and dRNA-seq sessions.
+The transcript consolidation step is mainly used for analyzing long-read RNA-seq data, including Nanopore direct RNA-seq (dRNA-seq) and Pac-Bio Iso-Seq (Iso-Seq) data. The `NIAP_v1.2.pl` script is used for this purpose. The overall workflow is shown in the schematic illustration below, which can be divided into Iso-Seq and dRNA-seq sessions.
 
 ![NIAP_consolidate](https://user-images.githubusercontent.com/34832128/113243647-f88ba700-92e5-11eb-8460-acd8991fcd94.jpg)
 
@@ -125,7 +125,7 @@ While NIAP handles Iso-Seq and dRNA-seq data differently as mentioned above, it 
 ### Usage
 
 ```
-perl NIAP_v1.1.pl [option]
+perl NIAP_v1.2.pl [option]
   -bam <String> Input bam file
   -junc <String> The gtf file specifying splice junctions used for correction. An optional attribute, depth, can be included.
   -injunc <Bolean> The intervals of splice junctions specified by -junc are introns. (Default: False for exons as input)

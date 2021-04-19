@@ -62,7 +62,7 @@ unless($query && $ref && $out){
 }
 
 system("bedtools sort -i $query >  temp_query_sorted.gtf");
-system("bedtools sort -i $ref >  temp_ref_sorted.gtf");
+system("bedtools sort -i $ref |  grep \"	exon	\" > temp_ref_sorted.gtf");
 open(QUERY, "temp_query_sorted.gtf") or die "Cannot open $query!\n";
 open(REF, "temp_ref_sorted.gtf") or die "Cannot open $ref!\n";
 open(OUT, ">temp_out.gtf") or die "Cannot create temp_out.gtf!\n";
@@ -238,9 +238,6 @@ while(<TEMP>){
 	chomp;
 	my $line = $_;
 	my @line = split('\t', $line);
-	if($line[11] ne "exon"){
-		next;
-	}
 	$line[8] =~ /gene_id \"([^\;]+)\"\;/;
 	my $gene_id = $1;
 	unless(exists $class{$gene_id}){

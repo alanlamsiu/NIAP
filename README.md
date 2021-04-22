@@ -144,7 +144,7 @@ perl NIAP_v1.2.pl [option]
 
 It is recommended to use minimap2 to generate the .bam file input.
 
-A .gtf file indicating the accurate exon-exon junctions for error correction can be specified, especially for dRNA-seq data. NIAP comes with a script, `NIAP_split_read2intron_v1.1.pl`, to generate a such file, which indicating the borders of introns.
+A .gtf file indicating the accurate exon-exon junctions for error correction can be specified, especially for dRNA-seq data. NIAP comes with two scripts, `NIAP_split_read2intron_v1.1.pl` and `NIAP_exon2intron_v1.1.pl`, to generate a such file using short-read RNA-seq data and reference genome annotation, respectively, which indicating the borders of introns.
 
 The shematic illustration below describe when the `-injunc` option is needed, when speciying the `-junc` option for error correction. If the exon-exon junctions .gtf file is genreated by `NIAP_split_read2intron_v1.1.pl`, the `-injunc` option is required.
 
@@ -188,9 +188,24 @@ If users would like to generate the .gtf file of accurate exon-exon junctions fr
 
 The output file will be in .gtf format indicating the borders of each intron and read depth by the `"depth"` attribute.
 
-The sohrt-read data can be unstranded or stranded. It is also acceptable to use long read data though it is generally not recommended.
+The sohrt-read data can be unstranded or stranded. It is also acceptable to use long-read data though it is generally not recommended.
 
 The short-reads can be filtered based on their mapping quality score by specifying the `-q` option.
+
+The `-btp` is not necessary if bedtools is already in $PATH.
+
+```
+perl NIAP_exon2intron_v1.1.pl [option]
+  -i <String> Input exon gtf file
+  -o <String> Basename of output files
+  -btp <String> The path to bedtools
+```
+
+Alternatively, if short-read RNA-seq data is not available, the splice sites from a reference genome annotation can also be used. However, it is not recommended because splice sites in the reference genome annotation may not completely correspond to those in long-read data.
+
+The input file is simply a .gtf file of the reference genome annotation.
+
+Two output file will be generated, a .gtf file of the introns and a .txt plain text file summarizing the length of each intron.
 
 The `-btp` is not necessary if bedtools is already in $PATH.
 

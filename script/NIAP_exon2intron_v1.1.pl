@@ -11,8 +11,6 @@
 #
 use strict;
 use Getopt::Long;
-use Bio::SeqIO;
-use Bio::Seq;
 
 my $version = "v1.1";
 
